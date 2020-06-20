@@ -1,0 +1,11 @@
+{
+  "name": "firebase-angular-lib",
+  "version": "0.0.2",
+  "peerDependencies": {
+    "@angular/common": "^8.0.3",
+    "@angular/core": "^8.0.3",
+    "class-transformer": "^0.2.3",
+    "reflect-metadata": "^0.1.13",
+    "firebase": "^7.15.1"
+  }
+}
