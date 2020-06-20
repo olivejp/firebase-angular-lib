@@ -1,6 +1,8 @@
 {
   "name": "firebase-angular-lib",
   "version": "0.0.2",
+  "author": "OLIVE Jean-Paul",
+  "licence": "MIT",
   "peerDependencies": {
     "@angular/common": "^8.0.3",
     "@angular/core": "^8.0.3",
