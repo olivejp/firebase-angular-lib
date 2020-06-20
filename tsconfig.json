@@ -17,6 +17,14 @@
     "lib": [
       "es2018",
       "dom"
-    ]
+    ],
+    "paths": {
+      "firebase-angular-lib": [
+        "dist/firebase-angular-lib"
+      ],
+      "firebase-angular-lib/*": [
+        "dist/firebase-angular-lib/*"
+      ]
+    }
   }
 }

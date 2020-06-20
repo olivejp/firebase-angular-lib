@@ -2,9 +2,30 @@
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 8.0.0.
 
-## Development server
+## Deployment
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+1-First of all, you should create and verify an user in https://www.npmjs.com/
+
+Before the first deployment, go to the root project then type :
+
+`npm adduser`
+
+This way you tell npm wich user is connected and want to deploy.
+
+Then you can build your library. Go to the root of the project and type :
+
+`ng build`
+
+Your library is ready in the /dist directory.
+
+Change directory to :
+
+`cd \dist\firebase-angular-lib`
+
+Then type the following command to publish to npm.registry :
+
+`npm publish`
+
 
 ## Code scaffolding
 
