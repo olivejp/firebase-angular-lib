@@ -1,0 +1,74 @@
+<div class="container-fluid border border-custom rounded pt-1">
+    <h3>
+        <span>Gestion des photos</span>
+        <button
+            type=button
+            ngfSelect
+            (fileChange)="addFile($event)"
+            accept="image/*"
+            class="btn btn-primary float-right rounded-circle">
+            <fa-icon icon="plus"></fa-icon>
+        </button>
+        <button
+            type=button
+            (click)="reindex()"
+            class="btn btn-warning float-right rounded-circle">
+            <fa-icon icon="recycle" style="color: white"></fa-icon>
+        </button>
+    </h3>
+    <div *ngIf="loadingDocuments" class="d-flex justify-center">
+        <div class="spinner-grow text-primary" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+    <div *ngIf="!loadingDocuments && (!documents || documents.length === 0)">
+        <p>Pour ajouter une nouvelle photo, cliquer sur le bouton +.</p>
+    </div>
+    <div *ngIf="!loadingDocuments && documents && documents.length > 0" class="table-responsive">
+        <table class="table table-striped" aria-describedby="user-management-page-heading">
+            <thead>
+            <tr>
+                <th scope="col"></th>
+                <th scope="col">Nom</th>
+                <th scope="col">Taille</th>
+                <th scope="col">Progress</th>
+                <th scope="col"></th>
+            </tr>
+            </thead>
+            <tbody cdkDropList (cdkDropListDropped)="drop($event)">
+            <tr *ngFor="let document of documents; trackBy: trackIdentity" cdkDrag>
+                <td><img [src]="document.downloadUrl" width="50" height="50" style="border-radius: 5px" alt="downloadUrl"></td>
+                <td>{{(document && document.metadata && document.metadata.customMetadata && document.metadata.customMetadata.realname) ? document.metadata.customMetadata.realname : document.name}}</td>
+                <td>{{document.metadata.size | filesize}}</td>
+                <td>
+                    <progress-bar *ngIf="document.status === 'UPLOADING' || document.status === 'PAUSED'"
+                                  [progress]="document.progress"
+                                  [color]="'#488aff'"></progress-bar>
+                </td>
+                <td class="text-right">
+                    <button *ngIf="document.status === 'TO_UPLOAD'" type="button" (click)="upload(document)"
+                            class="btn btn-success rounded-circle">
+                        <fa-icon icon="cloud-upload-alt" style="color: white"></fa-icon>
+                    </button>
+
+                    <button *ngIf="document.status === 'UPLOADING'" type="button" (click)="pauseUpload(document)"
+                            class="btn btn-warning rounded-circle">
+                        <fa-icon icon="pause" style="color: white"></fa-icon>
+                    </button>
+
+                    <button *ngIf="document.status === 'PAUSED'" type="button" (click)="resumeUpload(document)"
+                            class="btn btn-warning rounded-circle">
+                        <fa-icon icon="play" style="color: white"></fa-icon>
+                    </button>
+
+                    <button
+                        *ngIf="document.status === 'PAUSED' || document.status === 'ALREADY' || document.status === 'TO_UPLOAD'"
+                        type="button" (click)="deleteDocument(document)" class="btn btn-danger rounded-circle">
+                        <fa-icon icon="trash" style="color: white"></fa-icon>
+                    </button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

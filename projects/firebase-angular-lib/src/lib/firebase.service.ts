@@ -4,6 +4,8 @@ import {plainToClass} from 'class-transformer';
 import {Observable} from 'rxjs';
 import {ClassType} from 'class-transformer/ClassTransformer';
 import {FirebaseModel} from './firebase.model';
+import DocumentReference = firebase.firestore.DocumentReference;
+import CollectionReference = firebase.firestore.CollectionReference;
 
 export abstract class FirebaseService<T extends FirebaseModel> {
   protected tableName: string;
@@ -14,9 +16,17 @@ export abstract class FirebaseService<T extends FirebaseModel> {
     this.classType = type;
   }
 
-  create(model: T): Promise<void> {
-    const docReference = firebase.firestore().collection(this.tableName).doc();
-    model[model.getRef()] = docReference.id;
+  create(model: T, docPath?: string): Promise<void> {
+    const collectionRef = firebase.firestore().collection(this.tableName);
+
+    let docReference: DocumentReference;
+    if (docPath && docPath.length > 0) {
+      docReference = collectionRef.doc(docPath);
+    } else {
+      docReference = collectionRef.doc();
+      model[model.getRef()] = docReference.id;
+    }
+
     return docReference.set(Object.assign({}, model));
   }
 
@@ -50,7 +60,23 @@ export abstract class FirebaseService<T extends FirebaseModel> {
   listen(): Observable<[() => void, T[]]> {
     return new Observable(subscriber => {
       const unsubscribeLoadAll = firebase.firestore().collection(this.tableName).onSnapshot(snapshot => {
-        subscriber.next([unsubscribeLoadAll, snapshot.docs.map(article => plainToClass(this.classType, article.data()))]);
+        subscriber.next([unsubscribeLoadAll, snapshot.docs.map(item => plainToClass(this.classType, item.data()))]);
+      });
+    });
+  }
+
+  listenDoc(reference: DocumentReference): Observable<[() => void, T]> {
+    return new Observable(subscriber => {
+      const unsubscribe = reference.onSnapshot(snapshot => {
+        subscriber.next([unsubscribe, plainToClass(this.classType, snapshot.data())]);
+      });
+    });
+  }
+
+  listenCollection(reference: CollectionReference): Observable<[() => void, T[]]> {
+    return new Observable(subscriber => {
+      const unsubscribeLoadAll = reference.onSnapshot(snapshot => {
+        subscriber.next([unsubscribeLoadAll, snapshot.docs.map(item => plainToClass(this.classType, item.data()))]);
       });
     });
   }

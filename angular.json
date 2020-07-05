@@ -37,6 +37,10 @@
           }
         }
       }
-    }},
-  "defaultProject": "firebase-angular-lib"
+    }
+  },
+  "defaultProject": "firebase-angular-lib",
+  "cli": {
+    "analytics": false
+  }
 }

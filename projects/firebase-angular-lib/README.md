@@ -7,6 +7,11 @@ This library was generated with [Angular CLI](https://github.com/angular/angular
 Run `ng generate component component-name --project firebase-angular-lib` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module --project firebase-angular-lib`.
 > Note: Don't forget to add `--project firebase-angular-lib` or else it will be added to the default project in your `angular.json` file. 
 
+## Installing Peers dependencies
+
+You should have install npm-install-peers with this command : `npm install -g npm-install-peers`
+Then run : `npm-install-peers`
+
 ## Build
 
 Run `ng build firebase-angular-lib` to build the project. The build artifacts will be stored in the `dist/` directory.

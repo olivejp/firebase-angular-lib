@@ -26,6 +26,17 @@ Then type the following command to publish to npm.registry :
 
 `npm publish`
 
+## Test in local
+
+To test the library before publish it. You can go to the dist/firebase-angular-lib and type :
+
+`npm link`
+
+This will create a link to your local directory.
+
+Then in your other project using your library go to the root and type :
+
+`npm link firebase-angular-lib`
 
 ## Code scaffolding
 
