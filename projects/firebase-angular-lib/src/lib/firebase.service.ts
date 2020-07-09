@@ -1,12 +1,12 @@
 import * as firebase from 'firebase';
 
-import {classToPlain, Exclude, plainToClass} from 'class-transformer';
+import {classToPlain, plainToClass} from 'class-transformer';
 import {Observable} from 'rxjs';
 import {ClassType} from 'class-transformer/ClassTransformer';
 import {FirebaseModel} from './firebase.model';
+import {UpdateDependencies} from './decorators/update-decorator';
 import DocumentReference = firebase.firestore.DocumentReference;
 import CollectionReference = firebase.firestore.CollectionReference;
-import {UpdateDependencies} from './decorators/update-decorator';
 
 export abstract class FirebaseService<T extends FirebaseModel> {
   private readonly classType: ClassType<T>;
