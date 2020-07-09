@@ -8,39 +8,39 @@ import DocumentReference = firebase.firestore.DocumentReference;
 import CollectionReference = firebase.firestore.CollectionReference;
 
 export abstract class FirebaseService<T extends FirebaseModel> {
-  protected tableName: string;
   protected classType: ClassType<T>;
+  protected myInstance: T;
 
-  protected constructor(name: string, type: ClassType<T>) {
-    this.tableName = name;
+  protected constructor(type: ClassType<T>) {
     this.classType = type;
+    this.myInstance = new type();
   }
 
   create(model: T, docPath?: string): Promise<void> {
-    const collectionRef = firebase.firestore().collection(this.tableName);
+    const collectionRef = firebase.firestore().collection(model.getCollectionName());
 
     let docReference: DocumentReference;
     if (docPath && docPath.length > 0) {
       docReference = collectionRef.doc(docPath);
     } else {
       docReference = collectionRef.doc();
-      model[model.getRef()] = docReference.id;
+      model[model.getIdPropName()] = docReference.id;
     }
 
     return docReference.set(Object.assign({}, model));
   }
 
   update(model: T): Promise<void> {
-    return firebase.firestore().collection(this.tableName).doc(model[model.getRef()]).set(Object.assign({}, model));
+    return firebase.firestore().collection(model.getCollectionName()).doc(model[model.getIdPropName()]).set(Object.assign({}, model));
   }
 
   delete(model: T): Promise<void> {
-    return firebase.firestore().collection(this.tableName).doc(model[model.getRef()]).delete();
+    return firebase.firestore().collection(model.getCollectionName()).doc(model[model.getIdPropName()]).delete();
   }
 
   findAllOnce(field?: string, order?: 'desc' | 'asc'): Promise<T[]> {
     return new Promise<any[]>((resolve, reject) => {
-      const docRef = firebase.firestore().collection(this.tableName);
+      const docRef = firebase.firestore().collection(this.myInstance.getCollectionName());
       let promise: Promise<any>;
       if (field && order) {
         promise = docRef.orderBy(field, order).get();
@@ -59,7 +59,7 @@ export abstract class FirebaseService<T extends FirebaseModel> {
 
   listen(): Observable<[() => void, T[]]> {
     return new Observable(subscriber => {
-      const unsubscribeLoadAll = firebase.firestore().collection(this.tableName).onSnapshot(snapshot => {
+      const unsubscribeLoadAll = firebase.firestore().collection(this.myInstance.getCollectionName()).onSnapshot(snapshot => {
         subscriber.next([unsubscribeLoadAll, snapshot.docs.map(item => plainToClass(this.classType, item.data()))]);
       });
     });
