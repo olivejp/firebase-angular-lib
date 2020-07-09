@@ -17,25 +17,34 @@ export abstract class FirebaseService<T extends FirebaseModel> {
   }
 
   create(model: T, docPath?: string): Promise<void> {
-    const collectionRef = firebase.firestore().collection(model.getCollectionName());
+    if (model && model instanceof FirebaseModel) {
+      const collectionRef = firebase.firestore().collection(model.getCollectionName());
 
-    let docReference: DocumentReference;
-    if (docPath && docPath.length > 0) {
-      docReference = collectionRef.doc(docPath);
-    } else {
-      docReference = collectionRef.doc();
-      model[model.getIdPropName()] = docReference.id;
+      let docReference: DocumentReference;
+      if (docPath && docPath.length > 0) {
+        docReference = collectionRef.doc(docPath);
+      } else {
+        docReference = collectionRef.doc();
+        model[model.getIdPropName()] = docReference.id;
+      }
+
+      return docReference.set(Object.assign({}, model));
     }
-
-    return docReference.set(Object.assign({}, model));
+    return new Promise((resolve, reject) => reject('Model not found or not a FirebaseModel.'));
   }
 
   update(model: T): Promise<void> {
-    return firebase.firestore().collection(model.getCollectionName()).doc(model[model.getIdPropName()]).set(Object.assign({}, model));
+    if (model && model instanceof FirebaseModel) {
+      return firebase.firestore().collection(model.getCollectionName()).doc(model[model.getIdPropName()]).set(Object.assign({}, model));
+    }
+    return new Promise((resolve, reject) => reject('Model not found or not a FirebaseModel.'));
   }
 
   delete(model: T): Promise<void> {
-    return firebase.firestore().collection(model.getCollectionName()).doc(model[model.getIdPropName()]).delete();
+    if (model && model instanceof FirebaseModel) {
+      return firebase.firestore().collection(model.getCollectionName()).doc(model[model.getIdPropName()]).delete();
+    }
+    return new Promise((resolve, reject) => reject('Model not found or not a FirebaseModel.'));
   }
 
   findAllOnce(field?: string, order?: 'desc' | 'asc'): Promise<T[]> {
