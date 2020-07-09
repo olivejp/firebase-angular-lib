@@ -1,9 +1,13 @@
 import * as firebase from 'firebase';
 import DocumentReference = firebase.firestore.DocumentReference;
+import {Exclude} from 'class-transformer';
 
 export abstract class FirebaseModel {
 
+  @Exclude()
   private readonly collectionName: string;
+
+  @Exclude()
   private readonly idPropName: string;
 
   /**

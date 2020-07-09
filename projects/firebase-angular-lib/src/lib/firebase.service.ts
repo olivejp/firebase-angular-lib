@@ -1,22 +1,28 @@
 import * as firebase from 'firebase';
 
-import {plainToClass} from 'class-transformer';
+import {classToPlain, Exclude, plainToClass} from 'class-transformer';
 import {Observable} from 'rxjs';
 import {ClassType} from 'class-transformer/ClassTransformer';
 import {FirebaseModel} from './firebase.model';
 import DocumentReference = firebase.firestore.DocumentReference;
 import CollectionReference = firebase.firestore.CollectionReference;
+import {UpdateDependencies} from './decorators/update-decorator';
 
 export abstract class FirebaseService<T extends FirebaseModel> {
-  protected classType: ClassType<T>;
-  protected myInstance: T;
+  private readonly classType: ClassType<T>;
+  private readonly myInstance: T;
+  private readonly ignoredFields: string[];
 
-  protected constructor(type: ClassType<T>) {
+  private constructor(type: ClassType<T>) {
     this.classType = type;
     this.myInstance = new type();
   }
 
-  create(model: T, docPath?: string): Promise<void> {
+  protected toPlain(model: T): {} {
+    return classToPlain(model, {});
+  }
+
+  private create(model: T, docPath?: string): Promise<void> {
     if (model && model instanceof FirebaseModel) {
       const collectionRef = firebase.firestore().collection(model.getCollectionName());
 
@@ -28,26 +34,27 @@ export abstract class FirebaseService<T extends FirebaseModel> {
         model[model.getIdPropName()] = docReference.id;
       }
 
-      return docReference.set(Object.assign({}, model));
+      return docReference.set(this.toPlain(model));
     }
     return new Promise((resolve, reject) => reject('Model not found or not a FirebaseModel.'));
   }
 
-  update(model: T): Promise<void> {
+  @UpdateDependencies()
+  private update(model: T): Promise<void> {
     if (model && model instanceof FirebaseModel) {
-      return firebase.firestore().collection(model.getCollectionName()).doc(model[model.getIdPropName()]).set(Object.assign({}, model));
+      return firebase.firestore().collection(model.getCollectionName()).doc(model[model.getIdPropName()]).set(this.toPlain(model));
     }
     return new Promise((resolve, reject) => reject('Model not found or not a FirebaseModel.'));
   }
 
-  delete(model: T): Promise<void> {
+  private delete(model: T): Promise<void> {
     if (model && model instanceof FirebaseModel) {
       return firebase.firestore().collection(model.getCollectionName()).doc(model[model.getIdPropName()]).delete();
     }
     return new Promise((resolve, reject) => reject('Model not found or not a FirebaseModel.'));
   }
 
-  findAllOnce(field?: string, order?: 'desc' | 'asc'): Promise<T[]> {
+  private findAllOnce(field?: string, order?: 'desc' | 'asc'): Promise<T[]> {
     return new Promise<any[]>((resolve, reject) => {
       const docRef = firebase.firestore().collection(this.myInstance.getCollectionName());
       let promise: Promise<any>;
@@ -66,26 +73,30 @@ export abstract class FirebaseService<T extends FirebaseModel> {
     });
   }
 
-  listen(): Observable<[() => void, T[]]> {
+  private listen(): Observable<[() => void, T[]]> {
     return new Observable(subscriber => {
       const unsubscribeLoadAll = firebase.firestore().collection(this.myInstance.getCollectionName()).onSnapshot(snapshot => {
-        subscriber.next([unsubscribeLoadAll, snapshot.docs.map(item => plainToClass(this.classType, item.data()))]);
+        subscriber.next([unsubscribeLoadAll,
+          snapshot.docs.map(item => plainToClass(this.classType, item.data(),
+            {excludeExtraneousValues: true}))]);
       });
     });
   }
 
-  listenDoc(reference: DocumentReference): Observable<[() => void, T]> {
+  private listenDoc(reference: DocumentReference): Observable<[() => void, T]> {
     return new Observable(subscriber => {
       const unsubscribe = reference.onSnapshot(snapshot => {
-        subscriber.next([unsubscribe, plainToClass(this.classType, snapshot.data())]);
+        subscriber.next([unsubscribe, plainToClass(this.classType, snapshot.data(), {excludeExtraneousValues: true})]);
       });
     });
   }
 
-  listenCollection(reference: CollectionReference): Observable<[() => void, T[]]> {
+  private listenCollection(reference: CollectionReference): Observable<[() => void, T[]]> {
     return new Observable(subscriber => {
       const unsubscribeLoadAll = reference.onSnapshot(snapshot => {
-        subscriber.next([unsubscribeLoadAll, snapshot.docs.map(item => plainToClass(this.classType, item.data()))]);
+        subscriber.next([unsubscribeLoadAll,
+          snapshot.docs.map(item => plainToClass(this.classType, item.data(),
+            {excludeExtraneousValues: true}))]);
       });
     });
   }
