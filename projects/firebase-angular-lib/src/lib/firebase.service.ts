@@ -22,6 +22,10 @@ export abstract class FirebaseService<T extends FirebaseModel> {
     return classToPlain(model, {});
   }
 
+  getCollectionName(): string {
+    return this.myInstance.getCollectionName();
+  }
+
   create(model: T, docPath?: string): Promise<void> {
     if (model && model instanceof FirebaseModel) {
       const collectionRef = firebase.firestore().collection(model.getCollectionName());
