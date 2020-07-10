@@ -4,7 +4,7 @@ import {classToPlain, plainToClass} from 'class-transformer';
 import {Observable} from 'rxjs';
 import {ClassType} from 'class-transformer/ClassTransformer';
 import {FirebaseModel} from './firebase.model';
-import {UpdateDependencies} from './decorators/update-decorator';
+import {UpdateDependencies} from './update-decorator';
 import DocumentReference = firebase.firestore.DocumentReference;
 import CollectionReference = firebase.firestore.CollectionReference;
 
@@ -13,7 +13,7 @@ export abstract class FirebaseService<T extends FirebaseModel> {
   private readonly myInstance: T;
   private readonly ignoredFields: string[];
 
-  private constructor(type: ClassType<T>) {
+  constructor(type: ClassType<T>) {
     this.classType = type;
     this.myInstance = new type();
   }
@@ -22,7 +22,7 @@ export abstract class FirebaseService<T extends FirebaseModel> {
     return classToPlain(model, {});
   }
 
-  private create(model: T, docPath?: string): Promise<void> {
+  create(model: T, docPath?: string): Promise<void> {
     if (model && model instanceof FirebaseModel) {
       const collectionRef = firebase.firestore().collection(model.getCollectionName());
 
@@ -40,21 +40,21 @@ export abstract class FirebaseService<T extends FirebaseModel> {
   }
 
   @UpdateDependencies()
-  private update(model: T): Promise<void> {
+  update(model: T): Promise<void> {
     if (model && model instanceof FirebaseModel) {
       return firebase.firestore().collection(model.getCollectionName()).doc(model[model.getIdPropName()]).set(this.toPlain(model));
     }
     return new Promise((resolve, reject) => reject('Model not found or not a FirebaseModel.'));
   }
 
-  private delete(model: T): Promise<void> {
+  delete(model: T): Promise<void> {
     if (model && model instanceof FirebaseModel) {
       return firebase.firestore().collection(model.getCollectionName()).doc(model[model.getIdPropName()]).delete();
     }
     return new Promise((resolve, reject) => reject('Model not found or not a FirebaseModel.'));
   }
 
-  private findAllOnce(field?: string, order?: 'desc' | 'asc'): Promise<T[]> {
+  findAllOnce(field?: string, order?: 'desc' | 'asc'): Promise<T[]> {
     return new Promise<any[]>((resolve, reject) => {
       const docRef = firebase.firestore().collection(this.myInstance.getCollectionName());
       let promise: Promise<any>;
@@ -73,7 +73,7 @@ export abstract class FirebaseService<T extends FirebaseModel> {
     });
   }
 
-  private listen(): Observable<[() => void, T[]]> {
+  listen(): Observable<[() => void, T[]]> {
     return new Observable(subscriber => {
       const unsubscribeLoadAll = firebase.firestore().collection(this.myInstance.getCollectionName()).onSnapshot(snapshot => {
         subscriber.next([unsubscribeLoadAll,
@@ -83,7 +83,7 @@ export abstract class FirebaseService<T extends FirebaseModel> {
     });
   }
 
-  private listenDoc(reference: DocumentReference): Observable<[() => void, T]> {
+  listenDoc(reference: DocumentReference): Observable<[() => void, T]> {
     return new Observable(subscriber => {
       const unsubscribe = reference.onSnapshot(snapshot => {
         subscriber.next([unsubscribe, plainToClass(this.classType, snapshot.data(), {excludeExtraneousValues: true})]);
@@ -91,7 +91,7 @@ export abstract class FirebaseService<T extends FirebaseModel> {
     });
   }
 
-  private listenCollection(reference: CollectionReference): Observable<[() => void, T[]]> {
+  listenCollection(reference: CollectionReference): Observable<[() => void, T[]]> {
     return new Observable(subscriber => {
       const unsubscribeLoadAll = reference.onSnapshot(snapshot => {
         subscriber.next([unsubscribeLoadAll,

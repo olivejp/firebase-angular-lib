@@ -2,35 +2,10 @@ import * as firebase from 'firebase';
 import {from, Observable} from 'rxjs';
 import {concatMap} from 'rxjs/operators';
 import {classToPlain} from 'class-transformer';
-import FieldPath = firebase.firestore.FieldPath;
+import {FirebaseModel} from './firebase.model';
+import {UpdateDependencyOptions} from './update-dependencies-options';
 import QueryDocumentSnapshot = firebase.firestore.QueryDocumentSnapshot;
 import DocumentData = firebase.firestore.DocumentData;
-import {FirebaseModel} from '../firebase.model';
-
-export class UpdateDependencyOptions {
-  constructor(
-    public modelName: string,
-    public targetIndex: string,
-    public targetFieldPath: string | FieldPath,
-    public excludedFiles?: string[]
-  ) {
-  }
-}
-
-/**
- * Class Decorator to add fields on decorated class.
- * This decorator should be applied on FirebaseService only.
- */
-// Function qui sert de décorator et permet de récupérer les paramètres associés.
-export function FirebaseDependencies(dependencies: UpdateDependencyOptions[]): any {
-  // Function qui retourne une function.
-  return function addDependencies<T extends new (...args: any[]) => {}>(constructor: T): T {
-    // Function qui retourne un objet avec à l'intérieur les dépendances.
-    return class extends constructor {
-      dependencies = dependencies;
-    };
-  };
-}
 
 /**
  * Method Decorator to update the dependencies

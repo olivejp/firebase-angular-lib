@@ -1,0 +1,3 @@
+https://medium.com/@simonb90/comprendre-et-utiliser-les-d%C3%A9corateurs-avec-typescript-3c6cf8d38065
+https://www.typescriptlang.org/docs/handbook/decorators.html
+https://www.logicbig.com/tutorials/misc/typescript/method-decorator.html
