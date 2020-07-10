@@ -1,16 +1,34 @@
+import * as firebase from 'firebase';
+import DocumentReference = firebase.firestore.DocumentReference;
+import {Exclude} from 'class-transformer';
+
 export abstract class FirebaseModel {
 
-  private readonly reference: string;
+  @Exclude()
+  private readonly collectionName: string;
+
+  @Exclude()
+  private readonly idPropName: string;
 
   /**
    * The ref attribute references the class field used in firebase at the document id.
-   * @param ref: string
+   * @param collectionName The name of the collection
+   * @param idPropName The name of the property identifying the element
    */
-  protected constructor(ref: string) {
-    this.reference = ref;
+  protected constructor(collectionName: string, idPropName: string) {
+    this.collectionName = collectionName;
+    this.idPropName = idPropName;
   }
 
-  getRef(): string {
-    return this.reference;
+  getIdPropName(): string {
+    return this.idPropName;
+  }
+
+  getCollectionName(): string {
+    return this.collectionName;
+  }
+
+  getFirestoreRef(): DocumentReference {
+    return firebase.firestore().collection(this.collectionName).doc(this[this.idPropName]);
   }
 }

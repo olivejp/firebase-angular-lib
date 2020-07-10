@@ -10,3 +10,6 @@ export * from './lib/firebase.service';
 export * from './lib/document-management/document-management.component';
 export * from './lib/document-management/document.model';
 export * from './lib/document-management/document.service';
+export * from './lib/update-decorator';
+export * from './lib/firebase-dependencies';
+export * from './lib/update-dependencies-options';
