@@ -1,6 +1,6 @@
 import * as firebase from 'firebase';
 
-import {classToPlain, plainToClass} from 'class-transformer';
+import {plainToClass} from 'class-transformer';
 import {Observable} from 'rxjs';
 import {ClassType} from 'class-transformer/ClassTransformer';
 import {FirebaseModel} from './firebase.model';
@@ -18,9 +18,7 @@ export abstract class FirebaseService<T extends FirebaseModel> {
     this.myInstance = new type();
   }
 
-  protected toPlain(model: T): {} {
-    return classToPlain(model, {});
-  }
+  protected abstract toPlain(model: T): {};
 
   getCollectionName(): string {
     return this.myInstance.getCollectionName();
