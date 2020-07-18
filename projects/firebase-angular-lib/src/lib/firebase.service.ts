@@ -7,6 +7,8 @@ import {FirebaseModel} from './firebase.model';
 import {UpdateDependencies} from './update-decorator';
 import DocumentReference = firebase.firestore.DocumentReference;
 import CollectionReference = firebase.firestore.CollectionReference;
+import FieldPath = firebase.firestore.FieldPath;
+import WhereFilterOp = firebase.firestore.WhereFilterOp;
 
 export abstract class FirebaseService<T extends FirebaseModel> {
   private readonly classType: ClassType<T>;
@@ -18,7 +20,9 @@ export abstract class FirebaseService<T extends FirebaseModel> {
     this.myInstance = new type();
   }
 
-  protected abstract toPlain(model: T): {};
+  abstract toPlain(model: T): {};
+
+  abstract plainToClass(model: ClassType<T>, data: any, options?: any): T;
 
   getCollectionName(): string {
     return this.myInstance.getCollectionName();
@@ -26,7 +30,7 @@ export abstract class FirebaseService<T extends FirebaseModel> {
 
   create(model: T, docPath?: string): Promise<void> {
     if (model && model instanceof FirebaseModel) {
-      const collectionRef = firebase.firestore().collection(model.getCollectionName());
+      const collectionRef = firebase.firestore().collection(this.myInstance.getCollectionName());
 
       let docReference: DocumentReference;
       if (docPath && docPath.length > 0) {
@@ -44,14 +48,16 @@ export abstract class FirebaseService<T extends FirebaseModel> {
   @UpdateDependencies()
   update(model: T): Promise<void> {
     if (model && model instanceof FirebaseModel) {
-      return firebase.firestore().collection(model.getCollectionName()).doc(model[model.getIdPropName()]).set(this.toPlain(model));
+      return firebase.firestore()
+        .collection(this.myInstance.getCollectionName())
+        .doc(model[model.getIdPropName()]).set(this.toPlain(model));
     }
     return new Promise((resolve, reject) => reject('Model not found or not a FirebaseModel.'));
   }
 
   delete(model: T): Promise<void> {
     if (model && model instanceof FirebaseModel) {
-      return firebase.firestore().collection(model.getCollectionName()).doc(model[model.getIdPropName()]).delete();
+      return firebase.firestore().collection(this.myInstance.getCollectionName()).doc(model[model.getIdPropName()]).delete();
     }
     return new Promise((resolve, reject) => reject('Model not found or not a FirebaseModel.'));
   }
@@ -100,6 +106,21 @@ export abstract class FirebaseService<T extends FirebaseModel> {
           snapshot.docs.map(item => plainToClass(this.classType, item.data(),
             {excludeExtraneousValues: true}))]);
       });
+    });
+  }
+
+  getWithCondition(fieldPath: string | FieldPath, optStr: WhereFilterOp, value: any): Observable<[() => void, T[]]> {
+    return new Observable(subscriber => {
+      const unsubscribeLoadAll = firebase
+        .firestore()
+        .collection(this.myInstance.getCollectionName())
+        .where(fieldPath, optStr, value)
+        .onSnapshot(snapshot => {
+          subscriber.next([
+            unsubscribeLoadAll,
+            snapshot.docs.map(item => this.plainToClass(this.classType, item.data(), {excludeExtraneousValues: true})),
+          ]);
+        });
     });
   }
 }
