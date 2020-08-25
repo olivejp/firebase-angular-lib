@@ -1,4 +1,4 @@
-import {UpdateDependencyOptions} from './update-dependencies-options';
+import {UpdateDependencyOptions} from './dependencies-options';
 
 /**
  * Class Decorator to add fields on decorated class.

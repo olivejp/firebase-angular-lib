@@ -11,5 +11,7 @@ export * from './lib/document-management/document-management.component';
 export * from './lib/document-management/document.model';
 export * from './lib/document-management/document.service';
 export * from './lib/update-decorator';
+export * from './lib/delete-decorator';
+export * from './lib/one-to-one-decorator';
 export * from './lib/firebase-dependencies';
-export * from './lib/update-dependencies-options';
+export * from './lib/dependencies-options';
