@@ -26,6 +26,16 @@ Then type the following command to publish to npm.registry :
 
 `npm publish`
 
+## UPDATE : 25/08/2020 - Build and publish with schematics
+
+If you want to buildyour project with schematics and publish the whole pack to npm
+
+Upgrade your lib version in the firebase-angular-lib/package.json
+
+Then call :
+
+`npm run build-all-and-publish` 
+
 ## Test in local
 
 To test the library before publish it. You can go to the dist/firebase-angular-lib and type :
