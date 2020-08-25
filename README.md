@@ -36,6 +36,10 @@ Then call :
 
 `npm run build-all-and-publish` 
 
+To test your schematic go to .../project/firebase-angular-lib then call :
+
+`ng generate firebase-angular-lib:my-service`
+
 ## Test in local
 
 To test the library before publish it. You can go to the dist/firebase-angular-lib and type :

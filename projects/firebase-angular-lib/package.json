@@ -29,7 +29,9 @@
     "copy:collection": "cp schematics/collection.json ../../dist/firebase-angular-lib/schematics/collection.json",
     "postbuild": "npm run copy:schemas && npm run copy:files && npm run copy:collection",
 
-    "build-all-and-publish": "cd .. && cd .. && ng build firebase-angular-lib && cd projects/firebase-angular-lib && npm run build && npm publish"
+    "build-all": "cd .. && cd .. && ng build firebase-angular-lib && cd projects/firebase-angular-lib && npm run build",
+    "build-all-and-publish": "npm run build-all && npm publish",
+    "build-all-and-link": "npm run build-all && cd .. && cd .. && npm link dist/firebase-angular-lib"
   },
   "schematics": "./schematics/collection.json",
   "ng-add": {

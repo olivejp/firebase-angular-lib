@@ -34,17 +34,24 @@ export function myService(options: MyServiceSchema): Rule {
       options.path = `${project.sourceRoot}/${projectType}`;
     }
 
+    const finalDir = options.path + '/src';
+
     const templateSource = apply(url('./files'), [
       applyTemplates({
         classify: strings.classify,
         dasherize: strings.dasherize,
         name: options.name
       }),
-      move(normalize(options.path as string))
+      move(normalize(finalDir as string))
+    ]);
+
+    const addRestService = apply(url('./files/rest.service.ts'), [
+      move(normalize(finalDir as string))
     ]);
 
     return chain([
-      mergeWith(templateSource)
+      mergeWith(templateSource),
+      mergeWith(addRestService)
     ]);
   };
 }
